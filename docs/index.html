@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Review Prediction | FlyRank Research</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f7f8fc;color:#263247;line-height:1.7}
+header{background:#14243b;color:white;padding:65px 8%;text-align:center}
+header p{color:#d5dfed}
+nav{background:white;padding:15px;text-align:center;position:sticky;top:0}
+nav a{color:#315b91;text-decoration:none;margin:0 12px;font-size:14px}
+main{max-width:950px;margin:35px auto;padding:0 22px}
+section{background:white;padding:28px;margin-bottom:22px;border-radius:12px;box-shadow:0 3px 15px #182b4410}
+h2{color:#244c78;border-bottom:1px solid #e7edf4;padding-bottom:10px}
+h1{font-size:36px}
+.stat{display:inline-block;background:#edf3fb;padding:15px 22px;border-radius:9px;margin:8px}
+.bar{background:#e7edf4;height:18px;border-radius:10px;overflow:hidden}
+.fill{height:100%;background:#4779b5}
+table{width:100%;border-collapse:collapse}
+td,th{padding:12px;border-bottom:1px solid #e7edf4;text-align:left}
+a{color:#3269a6}
+footer{text-align:center;padding:35px;background:#14243b;color:white}
+small{color:#718096}
+</style>
+</head>
+<body>
+
+<header>
+<p>FLYRANK ML INTERNSHIP · RESEARCH PROJECT</p>
+<h1>Content Review Prioritization Using Machine Learning</h1>
+<p>An experimental study using anonymized content metadata</p>
+<p>Research by Kubra Fathima</p>
+</header>
+
+<nav>
+<a href="#question">Question</a>
+<a href="#data">Data</a>
+<a href="#method">Methodology</a>
+<a href="#results">Results</a>
+<a href="#limits">Limitations</a>
+<a href="#recommendations">Recommendations</a>
+</nav>
+
+<main>
+
+<section>
+<h2>Abstract</h2>
+<p>This research investigates whether machine learning can help identify content pages that may need editorial attention. An anonymized content refresh dataset containing 30,000 records was analysed using metadata features and a Random Forest classifier. The model was evaluated using a grouped client split and compared with a simple rule-based baseline. The baseline achieved Precision@50 of 0.46, while the Random Forest model achieved 0.40. The results suggest that the baseline performed better in this experiment, so the model is presented only as a human-review decision-support tool.</p>
+</section>
+
+<section id="question">
+<h2>1. Research Question</h2>
+<p>Can machine learning help identify content pages that may need attention based on their content and keyword metadata?</p>
+<p>The decision supported is which pages content editors should review first. The system provides suggestions, not automatic content changes.</p>
+</section>
+
+<section id="data">
+<h2>2. Data</h2>
+<p>This research uses the anonymized <code>content_refresh_anonymized.csv</code> starter dataset provided through the FlyRank ML Internship.</p>
+<div class="stat"><strong>30,000</strong><br>Records</div>
+<div class="stat"><strong>44</strong><br>Original columns</div>
+<div class="stat"><strong>32</strong><br>Clients represented</div>
+<p>One row represents one anonymized content page. The development and verification work used the March 2026 window where specified in the data-contract analysis.</p>
+<p>Features include search volume, competition, CPC, word count, character count, content type, main intent and competition level.</p>
+<p>Identifiers were not used as model features. Target-related fields and historical performance fields that could reveal the outcome were excluded from the final model. No client names, private URLs or private search queries are published.</p>
+<p>This experiment uses the anonymized starter dataset, not the full 79-million-row production warehouse.</p>
+</section>
+
+<section id="method">
+<h2>3. Methodology</h2>
+<p>The target label is <code>is_declining_label</code>: 1 represents a downward trend and 0 represents a non-downward trend. It was derived from the dataset's <code>trend_direction</code> field.</p>
+<p>A Random Forest classifier with 100 trees, balanced class weights and random_state 42 was trained using metadata-only features.</p>
+<p>Validation used a grouped client split: 25 clients for training and 7 unseen clients for testing, containing 6,163 test records.</p>
+<p>The final feature set excluded client and content identifiers, the target and target-related fields, and historical performance fields to reduce leakage risk.</p>
+<p>The rule-based baseline used freshness and impression tiers. Both methods were evaluated on the same held-out records.</p>
+</section>
+
+<section id="results">
+<h2>4. Results: Model vs Baseline</h2>
+<table>
+<tr><th>Method</th><th>Precision@50</th></tr>
+<tr><td>Rule-based baseline</td><td><strong>0.46</strong></td></tr>
+<tr><td>Random Forest model</td><td><strong>0.40</strong></td></tr>
+</table>
+<h3>Precision@50 comparison</h3>
+<p>Rule-based baseline — 0.46</p>
+<div class="bar"><div class="fill" style="width:46%"></div></div>
+<p>Random Forest — 0.40</p>
+<div class="bar"><div class="fill" style="width:40%"></div></div>
+<p>Both methods were evaluated on 6,163 records from 7 unseen clients. The baseline performed better by 0.06. Machine learning did not outperform the simple baseline in this experiment.</p>
+</section>
+
+<section id="limits">
+<h2>5. Limitations and Honest Interpretation</h2>
+<ul>
+<li>The experiment used 30,000 anonymized starter records, not the full production warehouse.</li>
+<li>The grouped test contained only 7 unseen clients.</li>
+<li>The model's Precision@50 was lower than the baseline.</li>
+<li>Metadata cannot fully represent content quality, user needs or business value.</li>
+<li>A downward trend does not always mean that a page needs updating.</li>
+<li>Results may not generalize to other clients or future datasets.</li>
+</ul>
+<p>This is an experimental decision-support system. Further validation and expert feedback are needed before wider use.</p>
+</section>
+
+<section id="recommendations">
+<h2>6. Ranked Recommendations</h2>
+<p>The action playbook assigns reason codes and suggested actions to pages for human review.</p>
+<table>
+<tr><th>Reason code</th><th>Suggested action</th></tr>
+<tr><td>REFRESH_REVIEW</td><td>Review content for possible updates</td></tr>
+<tr><td>LOW_VISIBILITY</td><td>Investigate search visibility</td></tr>
+<tr><td>NEW_CONTENT</td><td>Monitor before major changes</td></tr>
+<tr><td>OLDER_CONTENT</td><td>Check whether content is still useful</td></tr>
+<tr><td>GENERAL_REVIEW</td><td>Perform a manual review</td></tr>
+</table>
+<p>Editors should verify page accuracy, search performance and business importance before taking action. Publishing, deleting or rewriting content must never happen automatically.</p>
+</section>
+
+<section>
+<h2>7. Reproducibility</h2>
+<p>The experiments use Python, pandas and scikit-learn. The random seed is 42.</p>
+<ul>
+<li><a href="https://colab.research.google.com/github/kubrafathima2005-kf/flyrank-ml-internship/blob/main/work/notebooks/w05_model.ipynb">Week 5: Model Training</a></li>
+<li><a href="https://colab.research.google.com/github/kubrafathima2005-kf/flyrank-ml-internship/blob/main/work/notebooks/w06_validation_audit.ipynb">Week 6: Validation Audit</a></li>
+<li><a href="https://colab.research.google.com/github/kubrafathima2005-kf/flyrank-ml-internship/blob/main/work/notebooks/w07_action_playbook.ipynb">Week 7: Action Playbook</a></li>
+<li><a href="https://colab.research.google.com/github/kubrafathima2005-kf/flyrank-ml-internship/blob/main/work/notebooks/capstone.ipynb">Capstone Notebook</a></li>
+</ul>
+<p><a href="https://github.com/kubrafathima2005-kf/flyrank-ml-internship">View the complete GitHub repository</a></p>
+</section>
+
+<section>
+<h2>8. Artifacts</h2>
+<p>The capstone notebook generates a model-versus-baseline comparison chart and a reason-code distribution chart. The W07 action playbook also generates a ranked queue, metrics file and reason-code chart.</p>
+<p>These artifacts are reproducible through the notebooks in the repository.</p>
+</section>
+
+<section>
+<h2>9. Acknowledgments and Data Credit</h2>
+<p>This project was completed as part of the FlyRank ML Internship.</p>
+<p><strong>Built on the <a href="https://flyrank.ai">FlyRank ML Internship dataset</a>.</strong></p>
+<p>Thank you to FlyRank for providing the learning opportunity and dataset for this research.</p>
+</section>
+
+</main>
+
+<footer>
+<p>FlyRank ML Internship Research Project</p>
+<p>Research by Kubra Fathima</p>
+</footer>
+
+</body>
+</html>
